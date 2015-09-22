@@ -24,17 +24,6 @@ export default class Restorun extends React.Component {
     new google.maps.Marker(options);
   }
 
-  searchLocation = (location) => {
-    let request = {
-      location: location,
-      radius: '5000',
-      types: ['restaurant']
-    };
-
-    let service = new google.maps.places.PlacesService(this.state.map);
-    service.nearbySearch(request, this._handlePlacesSearch);
-  };
-
   componentDidMount = () => {
     let initMapCenter = this.mapCenterLatLng();
     let mapOptions = {
@@ -43,17 +32,28 @@ export default class Restorun extends React.Component {
     }
 
     this.state.map = new google.maps.Map(React.findDOMNode(this.refs.map), mapOptions);
-    this.searchLocation(initMapCenter);
 
+    this.state.map.addListener('idle', this._handleIdle)
     window.addEventListener('resize', this._handleResize);
   }
 
   componentWillUnmount = () => {
-    window.removeEventListener('resize', this._handleResize);
+    window.removeListener('resize', this._handleResize);
+    this.state.map.removeEventListener('idle', this._handleIdle)
   };
 
   // EVENT HANDLERS
-  _handlePlacesSearch = (results, status) => {
+  _handleIdle = (event) => {
+    let request = {
+      bounds: this.state.map.getBounds(),
+      types: ['restaurants', 'restaurant']
+    };
+
+    let service = new google.maps.places.PlacesService(this.state.map);
+    service.radarSearch(request, this._handlePlacesSearch);
+  };
+
+  _handlePlacesSearch = (results, status, pagination) => {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
       for (let i = 0; i < results.length; i++) {
         let place = results[i];
