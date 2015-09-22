@@ -33,5 +33,6 @@
   },
   "dependencies": {
     "react": "^0.13.3",
+    "react-google-maps": "^2.1.0"
   }
 }
