@@ -16,12 +16,25 @@ export default class Restorun extends React.Component {
   }
 
   placeMarker = (result) => {
+    //TODO: Don't place marker if there is one already there
     let options = {
       position: result.geometry.location,
-      map: this.state.map
+      map: this.state.map,
+      icon: {
+        url: this.getIconUrl(),
+        anchor: new google.maps.Point(10, 10),
+        scaledSize: new google.maps.Size(10, 10)
+      }
     }
 
     new google.maps.Marker(options);
+  }
+
+
+  getIconUrl = () => {
+    let rand = (min, max) => { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+    return `https://cdnjs.cloudflare.com/ajax/libs/emojione/1.5.0/assets/svg/1F35${rand(1,9)}.svg`
   }
 
   componentDidMount = () => {
