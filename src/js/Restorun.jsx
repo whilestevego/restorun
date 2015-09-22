@@ -1,26 +1,52 @@
 import React from 'react';
-import { GoogleMap, Marker } from 'react-google-maps';
 
 export default class Restorun extends React.Component {
+  static defaultProps = {
+    initialZoom: 14,
+    lat: 49.282225,
+    lng: -123.122884
+  }
+
   state = {
-    center: {lat: 49.282225, lng: -123.122884}
+    window: {width: window.innerWidth, height: window.innerHeight}
+  };
+
+  mapCenterLatLng = () => {
+    return new google.maps.LatLng(this.props.lat, this.props.lng);
+  }
+
+  handleResize = (event) => {
+    this.setState({window: {width: window.innerWidth, height: window.innerHeight}});
+  };
+
+  componentDidMount = () => {
+    let mapOptions = {
+      center: this.mapCenterLatLng(),
+      zoom: this.props.initialZoom
+    }
+
+    let map = new google.maps.Map(React.findDOMNode(this.refs.map), mapOptions);
+
+    this.setState({map: map});
+
+    window.addEventListener('resize', this.handleResize);
+  }
+
+  componentWillUnmount = () => {
+    window.removeEventListener('resize', this.handleResize);
   };
 
   render () {
     return (
-      <GoogleMap
-        containerProps={{
-          ...this.props,
-          style: {
-            height: "500px",
-            width: "500px"
-          },
-        }}
+      <div
         ref="map"
-        defaultZoom={14}
-        defaultCenter={this.state.center}
-      >
-      </GoogleMap>
+        className='google-map'
+        style={{
+          height: this.state.window.height  + "px",
+          width: this.state.window.width + "px"
+        }}
+        >
+      </div>
     );
   }
-}
+};
