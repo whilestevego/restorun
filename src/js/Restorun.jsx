@@ -27,7 +27,18 @@ export default class Restorun extends React.Component {
       }
     }
 
-    new google.maps.Marker(options);
+    let marker = new google.maps.Marker(options);
+
+    google.maps.event.addListener(marker, 'click', () => {
+      this.state.service.getDetails(result, (result, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK) {
+          console.error(status);
+          return;
+        }
+        this.state.infoWindow.setContent(result.name);
+        this.state.infoWindow.open(this.state.map, marker);
+      });
+    });
   }
 
 
@@ -45,6 +56,7 @@ export default class Restorun extends React.Component {
     }
 
     this.state.map = new google.maps.Map(React.findDOMNode(this.refs.map), mapOptions);
+    this.state.infoWindow = new google.maps.InfoWindow();
 
     this.state.map.addListener('idle', this._handleIdle)
     window.addEventListener('resize', this._handleResize);
@@ -62,8 +74,8 @@ export default class Restorun extends React.Component {
       types: ['restaurants', 'restaurant']
     };
 
-    let service = new google.maps.places.PlacesService(this.state.map);
-    service.radarSearch(request, this._handlePlacesSearch);
+    this.state.service = new google.maps.places.PlacesService(this.state.map);
+    this.state.service.radarSearch(request, this._handlePlacesSearch);
   };
 
   _handlePlacesSearch = (results, status, pagination) => {
